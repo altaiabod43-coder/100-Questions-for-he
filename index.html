@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لعبة الحب</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial;}
+
+body{
+    background:linear-gradient(135deg,#0b0000,#2b0000,#000);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.game{
+    width:90%;
+    max-width:650px;
+    background:#111;
+    padding:15px;
+    border-radius:20px;
+}
+
+.card{
+    background:#fff4e8;
+    border:10px solid #7b0000;
+    border-radius:20px;
+    padding:25px;
+    text-align:center;
+}
+
+.question{
+    font-size:24px;
+    margin-bottom:20px;
+    color:#400000;
+}
+
+textarea{
+    width:100%;
+    height:90px;
+    padding:10px;
+    border:2px solid #7b0000;
+    border-radius:10px;
+    font-size:18px;
+}
+
+button{
+    margin-top:15px;
+    padding:12px 25px;
+    background:#7b0000;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+button:hover{background:#a00000;}
+
+.count{
+    margin-top:10px;
+    color:#7b0000;
+}
+
+.answers{
+    display:none;
+    background:#fff4e8;
+    border:10px solid #7b0000;
+    border-radius:20px;
+    padding:20px;
+    max-height:80vh;
+    overflow:auto;
+}
+
+.answer{
+    margin:10px 0;
+    padding:10px;
+    background:#fff;
+    border-right:5px solid #7b0000;
+    border-radius:8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+<div class="card" id="game">
+    <div class="question" id="question"></div>
+    <textarea id="input" placeholder="اكتب جوابك..."></textarea>
+    <button onclick="next()">التالي</button>
+    <div class="count" id="count"></div>
+</div>
+
+<div class="answers" id="answersBox">
+    <h2>كل الأجوبة</h2>
+    <div id="list"></div>
+    <button onclick="restart()">إعادة</button>
+</div>
+
+</div>
+
+<script>
+
+let questions = [
+"شنو يعني الحب بالنسبة إلك؟",
+"تؤمن بالحب من أول نظرة؟",
+"شنو أكثر شي يجذبك بالشخص؟",
+"تحب تعبر عن مشاعرك لو تخليها بداخلك؟",
+"شنو أهم صفة بالشريك؟",
+"تحب الغيرة لو تكرهها؟",
+"شنو أكثر شي يفرحك بعلاقة حب؟",
+"شنو أكثر شي يزعلك بعلاقة؟",
+"تؤمن بالحب الحقيقي؟",
+"شنو تعريفك للوفاء؟",
+
+"تحب الرسائل الطويلة لو القصيرة؟",
+"تحب المفاجآت الرومانسية؟",
+"شنو أجمل كلمة حب سمعتها؟",
+"تحب تهتم بالتفاصيل؟",
+"شنو أكثر شي يخليك تغار؟",
+"تحب الشخص الصريح؟",
+"شنو أكثر شي يطمنك بالعلاقة؟",
+"تحب العلاقة تكون علنية لو خاصة؟",
+"شنو رأيك بالمسامحة بالحب؟",
+"شكد تقدر تتحمل من تحب؟",
+
+"تحب الهدايا الرومانسية؟",
+"شنو أجمل هدية حب استلمتها؟",
+"تحب تسمع كلمة أحبك هواي؟",
+"شنو أكثر تصرف رومانسي تحبه؟",
+"تحب الدلال؟",
+"شنو أكثر شي يزعلك من الحبيب؟",
+"تحب تسامح بسهولة؟",
+"شنو أكبر خطأ ممكن تسامحه؟",
+"شنو خطأ ما ممكن تسامحه؟",
+"تحب الاهتمام لو الحرية؟",
+
+"شنو أكثر شي يخليك تتمسك بشخص؟",
+"تحب الغزل؟",
+"شنو نوع الغزل اللي تحبه؟",
+"تحب تشارك كل تفاصيلك؟",
+"شنو رأيك بالبعد بالعلاقة؟",
+"تحب تحجي يومياً؟",
+"شنو أكثر شي يخليك تشتاق؟",
+"تحب تبين غيرتك؟",
+"شنو رأيك بالثقة؟",
+"شنو أكثر شي يقوي العلاقة؟",
+
+"تحب تبادر بالصلح؟",
+"شنو أكثر شي يخرب العلاقة؟",
+"تحب المزح ويا الحبيب؟",
+"شنو أكثر شي تحبه بالاهتمام؟",
+"تحب تسمع صوت الحبيب؟",
+"شنو أكثر شي يخليك تحب شخص أكثر؟",
+"تحب تعبر بالكلام لو بالأفعال؟",
+"شنو رأيك بالكذب الأبيض؟",
+"تحب تكتب رسائل حب؟",
+"شنو أكثر شي يخليك تذوب حب؟",
+
+"تحب العلاقة تكون هادئة لو حماسية؟",
+"شنو أكثر شي يخليك تضحك ويا الحبيب؟",
+"تحب تعتذر لو تنتظر؟",
+"شنو أصعب موقف بعلاقة؟",
+"تحب تعطي فرصة ثانية؟",
+"شنو أكثر شي يخليك تثق؟",
+"تحب الاهتمام بالتفاصيل الصغيرة؟",
+"شنو أكثر شي يخليك تزعل بسرعة؟",
+"تحب الشخص الحنون؟",
+"شنو أكثر شي يخليك ترتاح؟",
+
+"تحب تحجي عن مشاعرك؟",
+"شنو أكثر شي تحبه بالدلع؟",
+"تحب الهدوء بالعلاقة؟",
+"شنو أكثر شي يخليك تتعلق؟",
+"تحب الصراحة بكل شي؟",
+"شنو أكثر شي يخليك تخاف بالعلاقة؟",
+"تحب يكون الحبيب صديقك؟",
+"شنو أكثر شي يخليك تنجرح؟",
+"تحب المفاجآت الحلوة؟",
+"شنو أكثر شي يخليك تحس بالأمان؟",
+
+"تحب تشارك يومك؟",
+"شنو أكثر شي يخليك تفكر بالحبيب؟",
+"تحب تسمع اشتقتلك؟",
+"شنو أكثر شي يخليك تحن؟",
+"تحب تبين ضعفك؟",
+"شنو أكثر شي يخليك تحس بقيمتك؟",
+"تحب الاهتمام بالكلام؟",
+"شنو أكثر شي يخليك تشتاق بسرعة؟",
+"تحب الحنية الزايدة؟",
+"شنو أكثر شي يخليك تحب شخص أكثر؟",
+
+"تحب تكون الأولوية؟",
+"شنو أكثر شي يضايقك بالإهمال؟",
+"تحب تبين حبك قدام الناس؟",
+"شنو أكثر شي يخليك تغار بدون سبب؟",
+"تحب العلاقة تكون مستقرة؟",
+"شنو أكثر شي يخليك تتعب نفسياً بالعلاقة؟",
+"تحب الشخص يفهمك بدون كلام؟",
+"شنو أكثر شي يخليك تحب صوت الحبيب؟",
+"تحب تعيش قصة حب طويلة؟",
+"شنو أكثر شي يخليك تحلم بالمستقبل؟",
+
+"تحب تكتب اسم الحبيب؟",
+"شنو أكثر شي يخليك تضحك فجأة؟",
+"تحب الشخص اللي يدعمك؟",
+"شنو أكثر شي يخليك تحس بالاهتمام؟",
+"تحب تبين حبك بالهدايا؟",
+"شنو أكثر شي يخليك تحب البقاء؟",
+"تحب تعيش لحظات بسيطة؟",
+"شنو أكثر شي يخليك تتذكر الحبيب؟",
+"تحب العلاقة تكون عميقة؟",
+"شنو أكثر شي يخليك تحب بصدق؟"
+];
+
+let i = 0;
+let answers = [];
+
+function show(){
+    document.getElementById("question").innerText = questions[i];
+    document.getElementById("count").innerText = (i+1)+" / "+questions.length;
+    document.getElementById("input").value = "";
+}
+
+function next(){
+    let val = document.getElementById("input").value.trim();
+    if(val==""){alert("اكتب جواب");return;}
+
+    answers.push(val);
+
+    if(i < questions.length-1){
+        i++;
+        show();
+    }else{
+        finish();
+    }
+}
+
+function finish(){
+    document.getElementById("game").style.display="none";
+    document.getElementById("answersBox").style.display="block";
+
+    let list="";
+    for(let j=0;j<questions.length;j++){
+        list += `<div class="answer"><b>${questions[j]}</b><br>${answers[j]}</div>`;
+    }
+    document.getElementById("list").innerHTML=list;
+}
+
+function restart(){
+    i=0;
+    answers=[];
+    document.getElementById("game").style.display="block";
+    document.getElementById("answersBox").style.display="none";
+    show();
+}
+
+show();
+
+</script>
+
+</body>
+</html>
